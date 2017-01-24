@@ -8,4 +8,14 @@ public class Light {
     private String label;
     private double value;
     private String mote;
+
+    @Override
+    public String toString() {
+        return "Light{" +
+                "timestamp=" + timestamp +
+                ", label='" + label + '\'' +
+                ", value=" + value +
+                ", mote='" + mote + '\'' +
+                '}';
+    }
 }

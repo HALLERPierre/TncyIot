@@ -1,37 +1,24 @@
 package eu.telecomnancy.tncyiot;
 
-        import android.app.IntentService;
-        import android.content.BroadcastReceiver;
-        import android.content.Intent;
-        import android.content.Context;
-        import android.content.IntentFilter;
-        import android.os.Handler;
-        import android.util.Log;
-        import android.widget.Toast;
+import android.app.IntentService;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.util.Log;
 
-        import com.google.gson.Gson;
-        import com.google.gson.GsonBuilder;
-        import com.google.gson.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-        import org.apache.http.client.methods.HttpGet;
-        import org.apache.http.client.methods.HttpUriRequest;
-        import org.json.JSONException;
-        import org.json.JSONObject;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
-        import java.io.InputStreamReader;
-        import java.io.Reader;
-        import java.lang.reflect.Type;
-        import java.net.URI;
-        import java.net.URISyntaxException;
-        import java.text.SimpleDateFormat;
-        import java.util.ArrayList;
-        import java.util.Calendar;
-        import java.util.List;
-        import java.util.Timer;
-        import java.util.TimerTask;
+import eu.telecomnancy.tncyiot.Entity.Light;
+import eu.telecomnancy.tncyiot.Entity.RestResult;
 
-        import eu.telecomnancy.tncyiot.Entity.Light;
-        import eu.telecomnancy.tncyiot.Entity.RestResult;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -55,7 +42,46 @@ public class MainService extends IntentService {
     private static TimerTask timerTask;
     final Handler handler = new Handler();
 
-    private static final String ACTION_FOR_INTENT_CALLBACK = "REST_CALL_API_LIGHT";
+
+
+    public MainService() {
+        super("MainService");
+        timerTask = new TimerTask() {
+            public void run() {
+                //use a handler to run a toast that shows the current timestamp
+                handler.post(new Runnable() {
+                    public void run() {
+
+                        try {
+                            RestTask task = new RestTask(new RestTask.TaskListener() {
+                                @Override
+                                public void onFinished(String jsonresult) {
+                                    // Do Something after the task has finished
+                                    Log.i("MainService", "RESULT = " + jsonresult);
+                                    final Gson gson = new GsonBuilder().create();
+                                    Type castType = new TypeToken<RestResult<Light>>(){}.getType();
+
+                                    RestResult<Light> restresult = gson.fromJson(jsonresult, castType);
+
+                                    Log.i("IntentService", "RESPONSE = " + restresult.toString());
+                                    for(Light l : restresult.data){
+                                        Log.i("MainService", l.toString());
+
+                                    }
+                                }
+                            });
+                            task.execute(new URL("http://iotlab.telecomnancy.eu/rest/data/1/light1/last"));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+            }
+        };
+        myTimer = new Timer();
+    }
+
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -73,29 +99,6 @@ public class MainService extends IntentService {
 
     }
 
-
-    public MainService() {
-        super("MainService");
-        timerTask = new TimerTask() {
-            public void run() {
-                //use a handler to run a toast that shows the current timestamp
-                handler.post(new Runnable() {
-                    public void run() {
-                        //get the current timeStamp
-                        Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd:MMMM:yyyy HH:mm:ss a");
-                        final String strDate = simpleDateFormat.format(calendar.getTime());
-
-                        //show the toast
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(getApplicationContext(), strDate, duration);
-                        toast.show();
-                    }
-                });
-            }
-        };
-        myTimer = new Timer();
-    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -122,36 +125,7 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "handleActionOn called"
         );
-        timerTask = new TimerTask() {
-            public void run() {
 
-                //use a handler to run a toast that shows the current timestamp
-                handler.post(new Runnable() {
-                    public void run() {
-//                        //get the current timeStamp
-//                        Calendar calendar = Calendar.getInstance();
-//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd:MMMM:yyyy HH:mm:ss a");
-//                        final String strDate = simpleDateFormat.format(calendar.getTime());
-//
-//                        //show the toast
-//                        int duration = Toast.LENGTH_SHORT;
-//                        Toast toast = Toast.makeText(getApplicationContext(), strDate, duration);
-//                        toast.show();
-
-                        RestTask task = new RestTask(getApplicationContext(), ACTION_FOR_INTENT_CALLBACK);
-                        try {
-                            HttpGet httpGet = new HttpGet(new URI("http://iotlab.telecomnancy.eu/rest/data/1/light1/last"));
-                            httpGet.setHeader("Content-type", "application/json");
-                            task.execute(httpGet);
-
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
-            }
-        };
         timerTask.run();
         myTimer.scheduleAtFixedRate(timerTask, 0, 5000);
 
@@ -171,32 +145,9 @@ public class MainService extends IntentService {
         return START_STICKY;
     }
 
-    /**
-     * Our Broadcast Receiver. We get notified that the data is ready this way.
-     */
-    private BroadcastReceiver receiver = new BroadcastReceiver()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-
-            String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-            Log.i("IntentService", "RESPONSE = " + response);
-
-            final Gson gson = new GsonBuilder().create();
-
-            RestResult result = gson.fromJson(response, RestResult.class);
-            Log.i("IntentService", "RESPONSE = " + result);
-
-
-//            Type listType = new TypeToken<ArrayList<Light>>(){}.getType();
-//
-//            List<Light> yourClassList = new Gson().fromJson(response, listType);
-
-            //
-            // my old json code was here. this is where you will parse it.
-            //
-        }
-    };
+    @Override
+    public  void onCreate (){
+        super.onCreate();
+    }
 
 }
