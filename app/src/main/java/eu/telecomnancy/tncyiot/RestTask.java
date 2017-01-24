@@ -1,59 +1,33 @@
 package eu.telecomnancy.tncyiot;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.net.URI;
-import java.net.URL;
-
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.util.Log;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 
-/**
- * Created by kromer1u on 24/01/17.
- */
 
 public class RestTask extends AsyncTask<URL, Void, String> {
+    //client Http
     private HttpURLConnection urlConnection;
     // This is the reference to the associated listener
     private final TaskListener taskListener;
+    //contexte de l'application
+    private Context mContext;
 
-
-    public RestTask(TaskListener listener) {
+    public RestTask(Context appliContext, TaskListener listener) {
+        this.mContext = appliContext;
         // The listener reference is passed in through the constructor
         this.taskListener = listener;
     }
 
     public interface TaskListener {
-        public void onFinished(String result);
+        void onFinished(String result);
     }
 
 
@@ -102,6 +76,10 @@ public class RestTask extends AsyncTask<URL, Void, String> {
     protected void onPostExecute(String result)
     {
         super.onPostExecute(result);
+
+        if (result.isEmpty()){
+            Toast.makeText(mContext,"Your Message", Toast.LENGTH_LONG).show();
+        }
         // In onPostExecute we check if the listener is valid
         if(this.taskListener != null) {
 

@@ -53,7 +53,7 @@ public class MainService extends IntentService {
                     public void run() {
 
                         try {
-                            RestTask task = new RestTask(new RestTask.TaskListener() {
+                            RestTask task = new RestTask(getApplicationContext(),new RestTask.TaskListener() {
                                 @Override
                                 public void onFinished(String jsonresult) {
                                     // Do Something after the task has finished
@@ -63,10 +63,8 @@ public class MainService extends IntentService {
 
                                     RestResult<Light> restresult = gson.fromJson(jsonresult, castType);
 
-                                    Log.i("IntentService", "RESPONSE = " + restresult.toString());
                                     for(Light l : restresult.data){
                                         Log.i("MainService", l.toString());
-
                                     }
                                 }
                             });
