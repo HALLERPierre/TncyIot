@@ -27,7 +27,7 @@ public class MainActivity extends ActionBarActivity {
                 Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
                 serviceIntent.putExtra(MainService.EXTRA_PARAM1, "toto");
                 serviceIntent.putExtra(MainService.EXTRA_PARAM2, "titi");
-                serviceIntent.setAction(MainService.ACTION_FOO);
+                serviceIntent.setAction(MainService.ACTION_ON);
                 startService(serviceIntent);
             }
         });
@@ -36,7 +36,8 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                 Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
-                stopService(serviceIntent);
+                serviceIntent.setAction(MainService.ACTION_OFF);
+                startService(serviceIntent);
             }
         });
 

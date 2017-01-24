@@ -41,16 +41,18 @@ package eu.telecomnancy.tncyiot;
  * helper methods.
  */
 public class MainService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    public static final String ACTION_FOO = "eu.telecomnancy.tncyiot.action.FOO";
+    public static final String ACTION_ON = "eu.telecomnancy.tncyiot.action.ON";
+    public static final String ACTION_OFF = "eu.telecomnancy.tncyiot.action.OFF";
 
     // TODO: Rename parameters
     public static final String EXTRA_PARAM1 = "eu.telecomnancy.tncyiot.extra.PARAM1";
     public static final String EXTRA_PARAM2 = "eu.telecomnancy.tncyiot.extra.PARAM2";
 
-    //
-    TimerTask timerTask;
+
+    private static Timer myTimer;
+    private static TimerTask timerTask;
     final Handler handler = new Handler();
 
     private static final String ACTION_FOR_INTENT_CALLBACK = "REST_CALL_API_LIGHT";
@@ -64,7 +66,7 @@ public class MainService extends IntentService {
     // TODO: Customize helper method
     public static void startActionFoo(Context context, String param1, String param2) {
         Intent intent = new Intent(context, MainService.class);
-        intent.setAction(ACTION_FOO);
+        intent.setAction(ACTION_ON);
         intent.putExtra(EXTRA_PARAM1, param1);
         intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
@@ -74,6 +76,25 @@ public class MainService extends IntentService {
 
     public MainService() {
         super("MainService");
+        timerTask = new TimerTask() {
+            public void run() {
+                //use a handler to run a toast that shows the current timestamp
+                handler.post(new Runnable() {
+                    public void run() {
+                        //get the current timeStamp
+                        Calendar calendar = Calendar.getInstance();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd:MMMM:yyyy HH:mm:ss a");
+                        final String strDate = simpleDateFormat.format(calendar.getTime());
+
+                        //show the toast
+                        int duration = Toast.LENGTH_SHORT;
+                        Toast toast = Toast.makeText(getApplicationContext(), strDate, duration);
+                        toast.show();
+                    }
+                });
+            }
+        };
+        myTimer = new Timer();
     }
 
     @Override
@@ -83,12 +104,12 @@ public class MainService extends IntentService {
         );
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
+            if (ACTION_ON.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
-//                registerReceiver(receiver, new IntentFilter(ACTION_FOR_INTENT_CALLBACK));
-
+                handleActionOn(param1, param2);
+            } else if (ACTION_OFF.equals(action)){
+                handleActionOff();
             }
         }
     }
@@ -97,10 +118,9 @@ public class MainService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
+    private void handleActionOn(String param1, String param2) {
         Log.d("IntentService",
-                "handleActionFoo called"
+                "handleActionOn called"
         );
         timerTask = new TimerTask() {
             public void run() {
@@ -133,8 +153,17 @@ public class MainService extends IntentService {
             }
         };
         timerTask.run();
+        myTimer.scheduleAtFixedRate(timerTask, 0, 5000);
+
     }
 
+    private void handleActionOff(){
+        Log.d("IntentService",
+                "handleActionOff called"
+        );
+        timerTask.cancel();
+        myTimer.purge();
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
