@@ -1,6 +1,7 @@
 package eu.telecomnancy.tncyiot;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
@@ -39,10 +40,9 @@ import eu.telecomnancy.tncyiot.Entity.RestResult;
 public class MainService extends IntentService {
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    public static final String ACTION_ON = "eu.telecomnancy.tncyiot.action.ON";
-    public static final String ACTION_OFF = "eu.telecomnancy.tncyiot.action.OFF";
-    public static final String PUBLISH_RESULT = "eu.telecomnancy.tncyiot.service.receiver";
+    public static final String ACTION_START_ON_BOOT = "eu.telecomnancy.tncyiot.action.STARTONBOOT";
 
+    public static final String PUBLISH_RESULT = "eu.telecomnancy.tncyiot.service.receiver";
     // TODO: get url from activy
     public static final String INPUT_REST_URL = "eu.telecomnancy.tncyiot.extra.PARAM1";
     public static final String OUTPUT_LIGHTS_RECORDS = "eu.telecomnancy.tncyiot.extra.PARAM2";
@@ -150,8 +150,7 @@ public class MainService extends IntentService {
     }
 
     /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
+     * start thread and timer
      */
     public void handleActionOn(String param1) {
         Log.d("IntentService",
@@ -162,7 +161,10 @@ public class MainService extends IntentService {
         myTimer.scheduleAtFixedRate(timerTask, 0, 5000);
     }
 
-    public void handleActionOff(){
+    /**
+     * Stop thread and purge timer
+     */
+    public void handleActionOff() {
         Log.d("IntentService",
                 "handleActionOff called"
         );
@@ -184,6 +186,11 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "onBind called : service créé"
         );
+        //Start on boot if checked
+        String action = intent.getAction();
+        if(ACTION_START_ON_BOOT.equals(action)){
+            handleActionOn(null);
+        }
         return mBinder;
     }
 

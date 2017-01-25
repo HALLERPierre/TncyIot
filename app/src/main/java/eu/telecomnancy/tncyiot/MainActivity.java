@@ -6,18 +6,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 
 public class MainActivity extends ActionBarActivity {
     private BroadcastReceiver receiver = new MainActivityBroadcastReceiver();
+
+    //Key of checkBox
+    String startOnBoot = "eu.telecomnancy.tncyiot.app.startOnBoot";
 
     private MainService mService;
     boolean mBound = false;
@@ -25,14 +32,14 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Log.d("MainActivity",
                 "Création de l'activité"
         );
 
-        // Bind to LocalService
-        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
-        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        //get app prefs
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         Button buttonOn= (Button)findViewById(R.id.button);
         buttonOn.setOnClickListener(new View.OnClickListener() {
@@ -49,6 +56,29 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+
+        CheckBox checkBoxStart= (CheckBox) findViewById(R.id.checkBoxStart);
+        checkBoxStart.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Log.d("MainActivity",
+                        "checkbox changed : " + b
+                );
+                prefs.edit().putBoolean(startOnBoot, b).apply();
+            }
+        });
+
+        boolean isStartChecked = prefs.getBoolean(startOnBoot, false);
+        checkBoxStart.setChecked(isStartChecked);
+
+        // Create intent & Bind to MainService
+        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+        // Start on boot
+        if (isStartChecked) {
+            serviceIntent.setAction(MainService.ACTION_START_ON_BOOT);
+        }
+        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -64,8 +94,6 @@ public class MainActivity extends ActionBarActivity {
         );
         super.onDestroy();
         unbindService(mConnection);
-//        Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
-//        stopService(serviceIntent);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
