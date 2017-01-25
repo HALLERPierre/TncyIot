@@ -1,6 +1,8 @@
 package eu.telecomnancy.tncyiot;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
+    private BroadcastReceiver receiver = new MainActivityBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +28,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                 Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
-                serviceIntent.putExtra(MainService.EXTRA_PARAM1, "toto");
-                serviceIntent.putExtra(MainService.EXTRA_PARAM2, "titi");
+                serviceIntent.putExtra(MainService.INPUT_REST_URL, "toto");
                 serviceIntent.setAction(MainService.ACTION_ON);
                 startService(serviceIntent);
             }
@@ -51,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
     }
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
         stopService(serviceIntent);
     }
@@ -67,5 +70,16 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(MainService.PUBLISH_RESULT));
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 }

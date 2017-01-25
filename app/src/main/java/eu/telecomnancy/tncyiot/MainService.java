@@ -1,8 +1,8 @@
 package eu.telecomnancy.tncyiot;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -13,10 +13,15 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
+import eu.telecomnancy.tncyiot.Entity.LightRecords;
+import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
 import eu.telecomnancy.tncyiot.Entity.RestResult;
 
 
@@ -32,10 +37,13 @@ public class MainService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     public static final String ACTION_ON = "eu.telecomnancy.tncyiot.action.ON";
     public static final String ACTION_OFF = "eu.telecomnancy.tncyiot.action.OFF";
+    public static final String PUBLISH_RESULT = "eu.telecomnancy.tncyiot.service.receiver";
 
-    // TODO: Rename parameters
-    public static final String EXTRA_PARAM1 = "eu.telecomnancy.tncyiot.extra.PARAM1";
-    public static final String EXTRA_PARAM2 = "eu.telecomnancy.tncyiot.extra.PARAM2";
+    // TODO: get url from activy
+    public static final String INPUT_REST_URL = "eu.telecomnancy.tncyiot.extra.PARAM1";
+    public static final String OUTPUT_LIGHTS_RECORDS = "eu.telecomnancy.tncyiot.extra.PARAM2";
+
+    //
 
 
     private static Timer myTimer;
@@ -43,9 +51,9 @@ public class MainService extends IntentService {
     final Handler handler = new Handler();
 
 
-
     public MainService() {
         super("MainService");
+
         timerTask = new TimerTask() {
             public void run() {
                 //use a handler to run a toast that shows the current timestamp
@@ -58,14 +66,31 @@ public class MainService extends IntentService {
                                 public void onFinished(String jsonresult) {
                                     // Do Something after the task has finished
                                     Log.i("MainService", "RESULT = " + jsonresult);
+                                    LightsRecordsData lightsRecordsDataMap = new LightsRecordsData();
+
+
                                     final Gson gson = new GsonBuilder().create();
                                     Type castType = new TypeToken<RestResult<Light>>(){}.getType();
 
                                     RestResult<Light> restresult = gson.fromJson(jsonresult, castType);
 
                                     for(Light l : restresult.data){
-                                        Log.i("MainService", l.toString());
+                                        if (! lightsRecordsDataMap.containsKey(l.getLabel())){
+                                            lightsRecordsDataMap.put(l.getLabel(),new LightRecords(new LightRecords.ChangeListener() {
+                                                @Override
+                                                public void onChange(Light light) {
+                                                    Date date = new Date(light.getTimestamp());
+                                                    // S is the millisecond
+                                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
+
+                                                    LightNotification.notify(getApplicationContext(),light.getLabel(),simpleDateFormat.format(date));
+                                                }
+                                            }));
+                                        }
+                                        lightsRecordsDataMap.get(l.getLabel()).add(l);
+//                                        Log.i("MainService", l.toString());
                                     }
+                                    publishResults(lightsRecordsDataMap);
                                 }
                             });
                             task.execute(new URL("http://iotlab.telecomnancy.eu/rest/data/1/light1/last"));
@@ -81,22 +106,6 @@ public class MainService extends IntentService {
     }
 
 
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, MainService.class);
-        intent.setAction(ACTION_ON);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-
-    }
-
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -106,9 +115,8 @@ public class MainService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_ON.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionOn(param1, param2);
+                final String param1 = intent.getStringExtra(INPUT_REST_URL);
+                handleActionOn(param1);
             } else if (ACTION_OFF.equals(action)){
                 handleActionOff();
             }
@@ -119,7 +127,7 @@ public class MainService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionOn(String param1, String param2) {
+    private void handleActionOn(String param1) {
         Log.d("IntentService",
                 "handleActionOn called"
         );
@@ -146,6 +154,15 @@ public class MainService extends IntentService {
     @Override
     public  void onCreate (){
         super.onCreate();
+    }
+
+    private void publishResults(LightsRecordsData lightsRecordsDataMap) {
+        Intent intent = new Intent(PUBLISH_RESULT);
+        Bundle extras = new Bundle();
+        extras.putSerializable(OUTPUT_LIGHTS_RECORDS, lightsRecordsDataMap);
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+
     }
 
 }

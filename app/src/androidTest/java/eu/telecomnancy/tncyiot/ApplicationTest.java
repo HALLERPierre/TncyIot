@@ -2,23 +2,21 @@ package eu.telecomnancy.tncyiot;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
-import android.util.Log;
 
 import com.github.javafaker.Faker;
 
 import org.junit.Test;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
-import eu.telecomnancy.tncyiot.Util.MovingAverage;
+import eu.telecomnancy.tncyiot.Entity.LightRecords;
+import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -31,22 +29,39 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
+
     @Test
-    public void testDetecPeakInTime() {
+    public void testDetectSwitchOn(){
+        Faker faker = new Faker();
+        String label = "light1";
+        Light l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,Light.THRESHOLD,Light.THRESHOLD+50),faker.number().numberBetween(80,200)+"" );
+        assertTrue("SwitchOn ok",l.isSwitchOn()==true);
+
+
+    }
+
+    @Test
+    public void testDetectPeakInTime() {
         //https://fr.wikipedia.org/wiki/Moyenne_glissante
 
         //generates dummy data
         Faker faker = new Faker();
-        HashMap<String,List<Light>> map = new HashMap<>();
+        LightsRecordsData map = new LightsRecordsData();
         for (int i=0;i< 50;i++){
             String label = "light"+faker.number().randomDigit();
-            Light l = new Light(faker.date().between(new Date(2017,1,1), new Date(2017,1,24)).getTime(),label,faker.number().randomDouble(2,2,20),faker.number().numberBetween(80,200)+"" );
+            Light l = new Light(faker.date().between(new Date(2017,1,1), new Date(2017,1,24)).getTime(),label,faker.number().randomDouble(2,2,200),faker.number().numberBetween(80,200)+"" );
             if (! map.containsKey(label)){
-                map.put(label,new ArrayList<Light>());
+                map.put(label,new LightRecords(new LightRecords.ChangeListener() {
+                    @Override
+                    public void onChange(Light light) {
+
+                    }
+                }));
             }
             map.get(label).add(l);
         }
-        for(Map.Entry<String,List<Light>> entry : map.entrySet()) {
+        //sort light data
+        for(Map.Entry<String,LightRecords> entry : map.entrySet()) {
             List<Light> lightList = entry.getValue();
 
             Collections.sort(lightList, new Comparator<Light>() {
@@ -57,29 +72,11 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
                 }
             });
 
-            List<Double> testData = new ArrayList<>();
-            for (Light l :  lightList) {
-                testData.add(l.getValue());
-            }
-
-
-            int[] windowSizes = {5};
-            double previousMovingAverage = Double.MIN_VALUE;
-            for (int windSize : windowSizes) {
-                MovingAverage ma = new MovingAverage(windSize);
-                for (double x : testData) {
-                    ma.newNum(x);
-                    if (previousMovingAverage!=Double.MIN_VALUE){
-                        if (previousMovingAverage*1.2 < ma.getAvg() || previousMovingAverage*0.8 < ma.getAvg() ){
-                            Log.e("TEST","LUMIEEEERE");
-                        }
-                    }
-                    previousMovingAverage = ma.getAvg();
-                    Log.d("TEST","Next number = " + x + ", SMA = " + ma.getAvg());
-                }
-            }
-
         }
+        //add light switch on
+        String label = "light1";
+        Light l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,Light.THRESHOLD,Light.THRESHOLD+50),faker.number().numberBetween(80,200)+"" );
+        map.get(label).add(l);
 
 
 

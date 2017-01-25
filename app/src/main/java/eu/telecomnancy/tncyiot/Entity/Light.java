@@ -3,7 +3,9 @@ package eu.telecomnancy.tncyiot.Entity;
 /**
  * Created by kromer1u on 24/01/17.
  */
-public class Light {
+public class Light implements java.io.Serializable {
+
+    public static final int THRESHOLD = 250;
     private long timestamp;
     private String label;
     private double value;
@@ -20,12 +22,20 @@ public class Light {
         this.mote = mote;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
 
     public double getValue() {
         return value;
+    }
+
+    public boolean isSwitchOn(){
+        return value>THRESHOLD;
     }
 
     @Override
