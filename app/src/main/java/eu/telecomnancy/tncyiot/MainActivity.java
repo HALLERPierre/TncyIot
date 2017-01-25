@@ -1,9 +1,13 @@
 package eu.telecomnancy.tncyiot;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -15,6 +19,9 @@ import android.widget.Button;
 public class MainActivity extends ActionBarActivity {
     private BroadcastReceiver receiver = new MainActivityBroadcastReceiver();
 
+    private MainService mService;
+    boolean mBound = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,23 +30,22 @@ public class MainActivity extends ActionBarActivity {
                 "Création de l'activité"
         );
 
+        // Bind to LocalService
+        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+
         Button buttonOn= (Button)findViewById(R.id.button);
         buttonOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
-                serviceIntent.putExtra(MainService.INPUT_REST_URL, "toto");
-                serviceIntent.setAction(MainService.ACTION_ON);
-                startService(serviceIntent);
+                mService.handleActionOn(null);
             }
         });
         Button buttonOff= (Button)findViewById(R.id.button2);
         buttonOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
-                serviceIntent.setAction(MainService.ACTION_OFF);
-                startService(serviceIntent);
+                mService.handleActionOff();
             }
         });
 
@@ -53,9 +59,13 @@ public class MainActivity extends ActionBarActivity {
     }
     @Override
     protected void onDestroy() {
+        Log.d("MainActivity",
+                "onDestroy called"
+        );
         super.onDestroy();
-        Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
-        stopService(serviceIntent);
+        unbindService(mConnection);
+//        Intent serviceIntent = new Intent(getApplicationContext(),MainService.class);
+//        stopService(serviceIntent);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -82,4 +92,22 @@ public class MainActivity extends ActionBarActivity {
         super.onPause();
         unregisterReceiver(receiver);
     }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MainService.LocalBinder binder = (MainService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 }

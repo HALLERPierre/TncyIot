@@ -3,8 +3,10 @@ package eu.telecomnancy.tncyiot;
 import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -45,7 +47,8 @@ public class MainService extends IntentService {
     public static final String INPUT_REST_URL = "eu.telecomnancy.tncyiot.extra.PARAM1";
     public static final String OUTPUT_LIGHTS_RECORDS = "eu.telecomnancy.tncyiot.extra.PARAM2";
 
-    //
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
 
 
     private static Timer myTimer;
@@ -61,7 +64,6 @@ public class MainService extends IntentService {
                 //use a handler to run a toast that shows the current timestamp
                 handler.post(new Runnable() {
                     public void run() {
-
                         try {
                             RestTask task = new RestTask(getApplicationContext(),new RestTask.TaskListener() {
                                 @Override
@@ -91,22 +93,22 @@ public class MainService extends IntentService {
                                                     if (hourOfDay >= 18 && hourOfDay<= 23)
                                                         LightNotification.notify(getApplicationContext(),light.getLabel(),simpleDateFormat.format(date));
                                                     else {
-                                                        Intent intent = new Intent(Intent.ACTION_SENDTO);
-                                                        intent.setType("message/rfc822");
-                                                        intent.putExtra(Intent.EXTRA_EMAIL, "f.kromer54@gmail.com");
-                                                        intent.setData(Uri.parse("mailto:"+"f.kromer54@gmail.com"));
-                                                        intent.putExtra(Intent.EXTRA_SUBJECT, "azert");
-                                                        intent.putExtra(Intent.EXTRA_TEXT, "azertyuuyfcryxxu");
-                                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                        intent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-                                                        try {
-
-                                                            startActivity(intent);
-                                                        } catch (android.content.ActivityNotFoundException e) {
-                                                            // TODO Auto-generated catch block
-                                                            e.printStackTrace();
-                                                            Log.d("Email error:",e.toString());
-                                                        }
+//                                                        Intent intent = new Intent(Intent.ACTION_SENDTO);
+//                                                        intent.setType("message/rfc822");
+//                                                        intent.putExtra(Intent.EXTRA_EMAIL, "f.kromer54@gmail.com");
+//                                                        intent.setData(Uri.parse("mailto:"+"f.kromer54@gmail.com"));
+//                                                        intent.putExtra(Intent.EXTRA_SUBJECT, "azert");
+//                                                        intent.putExtra(Intent.EXTRA_TEXT, "azertyuuyfcryxxu");
+//                                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                                        intent.addFlags(Intent.FLAG_FROM_BACKGROUND);
+//                                                        try {
+//
+//                                                            startActivity(intent);
+//                                                        } catch (android.content.ActivityNotFoundException e) {
+//                                                            // TODO Auto-generated catch block
+//                                                            e.printStackTrace();
+//                                                            Log.d("Email error:",e.toString());
+//                                                        }
                                                     }
                                                 }
                                             }));
@@ -129,39 +131,38 @@ public class MainService extends IntentService {
         myTimer = new Timer();
     }
 
-
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        MainService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return MainService.this;
+        }
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d("IntentService",
                 "onHandleIntent called"
         );
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_ON.equals(action)) {
-                final String param1 = intent.getStringExtra(INPUT_REST_URL);
-                handleActionOn(param1);
-            } else if (ACTION_OFF.equals(action)){
-                handleActionOff();
-            }
-        }
     }
 
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionOn(String param1) {
+    public void handleActionOn(String param1) {
         Log.d("IntentService",
                 "handleActionOn called"
         );
 
         timerTask.run();
         myTimer.scheduleAtFixedRate(timerTask, 0, 5000);
-
     }
 
-    private void handleActionOff(){
+    public void handleActionOff(){
         Log.d("IntentService",
                 "handleActionOff called"
         );
@@ -171,12 +172,32 @@ public class MainService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("IntentService",
+                "onCreate called : service créé"
+        );
         super.onStartCommand(intent, startId, startId);
         return START_STICKY;
     }
 
     @Override
-    public  void onCreate (){
+    public IBinder onBind(Intent intent) {
+        Log.d("IntentService",
+                "onBind called : service créé"
+        );
+        return mBinder;
+    }
+
+
+    @Override
+    public void onDestroy(){
+        Log.d("IntentService",
+                "onDestroy called : service detruit"
+        );
+        super.onDestroy();
+    }
+
+    @Override
+    public  void onCreate(){
         super.onCreate();
     }
 
