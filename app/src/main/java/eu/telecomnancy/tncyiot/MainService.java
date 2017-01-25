@@ -2,6 +2,7 @@ package eu.telecomnancy.tncyiot;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -15,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -73,7 +75,7 @@ public class MainService extends IntentService {
                                     Type castType = new TypeToken<RestResult<Light>>(){}.getType();
 
                                     RestResult<Light> restresult = gson.fromJson(jsonresult, castType);
-
+                                    //todo:check if data not null
                                     for(Light l : restresult.data){
                                         if (! lightsRecordsDataMap.containsKey(l.getLabel())){
                                             lightsRecordsDataMap.put(l.getLabel(),new LightRecords(new LightRecords.ChangeListener() {
@@ -83,7 +85,29 @@ public class MainService extends IntentService {
                                                     // S is the millisecond
                                                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
 
-                                                    LightNotification.notify(getApplicationContext(),light.getLabel(),simpleDateFormat.format(date));
+
+                                                    Calendar calendar = Calendar.getInstance();
+                                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
+                                                    if (hourOfDay >= 18 && hourOfDay<= 23)
+                                                        LightNotification.notify(getApplicationContext(),light.getLabel(),simpleDateFormat.format(date));
+                                                    else {
+                                                        Intent intent = new Intent(Intent.ACTION_SENDTO);
+                                                        intent.setType("message/rfc822");
+                                                        intent.putExtra(Intent.EXTRA_EMAIL, "f.kromer54@gmail.com");
+                                                        intent.setData(Uri.parse("mailto:"+"f.kromer54@gmail.com"));
+                                                        intent.putExtra(Intent.EXTRA_SUBJECT, "azert");
+                                                        intent.putExtra(Intent.EXTRA_TEXT, "azertyuuyfcryxxu");
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                        intent.addFlags(Intent.FLAG_FROM_BACKGROUND);
+                                                        try {
+
+                                                            startActivity(intent);
+                                                        } catch (android.content.ActivityNotFoundException e) {
+                                                            // TODO Auto-generated catch block
+                                                            e.printStackTrace();
+                                                            Log.d("Email error:",e.toString());
+                                                        }
+                                                    }
                                                 }
                                             }));
                                         }
