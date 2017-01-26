@@ -73,10 +73,6 @@ public class MainActivity extends ActionBarActivity {
 
         // Create intent & Bind to MainService
         Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
-        // Start on boot
-        if (isStartChecked) {
-            serviceIntent.setAction(MainService.ACTION_START_ON_BOOT);
-        }
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
     }
