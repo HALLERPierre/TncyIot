@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -25,42 +26,26 @@ import javax.mail.internet.MimeMessage;
  */
 public class MailManager {
     private static final java.lang.String CONFIG_PROPERTIES = "prop.properties";
-    private static Date lastmailsenddate = new Date();
+    private static Date lastmailsenddate ;
 
     public static void sendMailSilent(Context contexte){
 
-        if (getDateDiff(new Date(),lastmailsenddate,TimeUnit.SECONDS)<30){
+        //init the last mail send date 1 minute ago
+        if (lastmailsenddate == null){
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MINUTE, -1);
+            lastmailsenddate = cal.getTime();
+
+        }
+        if (getDateDiff(lastmailsenddate,new Date(),TimeUnit.SECONDS)<30){
+            Log.e("Mail","sendMailSilent called but ignored");
             return;
         }
 
-        final Properties props = new Properties();
-
-        /**
-         * getAssets() Return an AssetManager instance for your
-         * application's package. AssetManager Provides access to an
-         * application's raw asset files;
-         */
-        AssetManager assetManager = contexte.getAssets();
-        /**
-         * Open an asset using ACCESS_STREAMING mode. This
-         */
-        InputStream inputStream = null;
-        try {
-            inputStream = assetManager.open(CONFIG_PROPERTIES);
-            props.load(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        /**
-         * Loads properties from the specified InputStream,
-         */
+        //load properties gmail account is not versionned
+        final Properties props = loadProperties(contexte);
 
 
-
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
 
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
@@ -82,11 +67,43 @@ public class MailManager {
             Transport.send(message);
             lastmailsenddate = new Date();
 
-            System.out.println("Done");
+            Log.d("Mail","sendMailSilent called");
+
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Properties loadProperties(Context contexte) {
+        Properties props = new Properties();
+        /**
+         * getAssets() Return an AssetManager instance for your
+         * application's package. AssetManager Provides access to an
+         * application's raw asset files;
+         */
+        AssetManager assetManager = contexte.getAssets();
+        /**
+         * Open an asset using ACCESS_STREAMING mode. This
+         */
+        InputStream inputStream = null;
+        try {
+            inputStream = assetManager.open(CONFIG_PROPERTIES);
+            props.load(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /**
+         * Loads properties from the specified InputStream,
+         */
+
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        return props;
+
     }
 
     public static  void sendMailIntent(Context contexte) {

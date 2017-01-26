@@ -25,11 +25,9 @@ import eu.telecomnancy.tncyiot.Util.MailManager;
 /**
  * Created by kromer1u on 26/01/17.
  */
-public abstract class LightTimerTask extends TimerTask  implements ILightTimerTaskCallback {
+public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
     final Handler handler = new Handler();
-    private Context context;
-    public LightTimerTask(Context myContext) {
-        context = myContext;
+    public LightTimerTask() {
     }
 
     @Override
@@ -38,7 +36,7 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
         handler.post(new Runnable() {
             public void run() {
                 try {
-                    RestTask task = new RestTask(context,new RestTask.TaskListener() {
+                    RestTask task = new RestTask(myTimerTaskContexte(),new RestTask.TaskListener() {
                         @Override
                         public void onFinished(String jsonresult) {
                             // Do Something after the task has finished
@@ -64,10 +62,10 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                                             Calendar calendar = Calendar.getInstance();
                                             int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
                                             if (hourOfDay >= 18 && hourOfDay<= 23)
-                                                LightNotification.notify(context,light.getLabel(),simpleDateFormat.format(date));
+                                                LightNotification.notify(myTimerTaskContexte(),light.getLabel(),simpleDateFormat.format(date));
                                             else {
 
-                                                MailManager.sendMailSilent(context);
+                                                MailManager.sendMailSilent(myTimerTaskContexte());
 //
                                             }
                                         }

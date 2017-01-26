@@ -1,6 +1,7 @@
 package eu.telecomnancy.tncyiot;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -41,13 +42,18 @@ public class MainService extends IntentService {
 
     public MainService() {
         super("MainService");
-
-        timerTask = new LightTimerTask(getApplicationContext()) {
+        timerTask = new LightTimerTask() {
             @Override
             public void myTimerTaskCallback(LightsRecordsData lightsRecordsDataMap) {
                 publishResults(lightsRecordsDataMap);
             }
+
+            @Override
+            public Context myTimerTaskContexte() {
+                return getApplicationContext();
+            }
         };
+
         myTimer = new Timer();
     }
 
@@ -101,6 +107,7 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "onCreate called : service créé"
         );
+
         super.onStartCommand(intent, startId, startId);
         //Start on boot if checked
         String action = intent.getAction();
