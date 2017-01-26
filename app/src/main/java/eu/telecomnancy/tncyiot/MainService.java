@@ -102,6 +102,11 @@ public class MainService extends IntentService {
                 "onCreate called : service créé"
         );
         super.onStartCommand(intent, startId, startId);
+        //Start on boot if checked
+        String action = intent.getAction();
+        if(ACTION_START_ON_BOOT.equals(action)){
+            handleActionOn(null);
+        }
         return START_STICKY;
     }
 
@@ -110,11 +115,6 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "onBind called : service créé"
         );
-        //Start on boot if checked
-        String action = intent.getAction();
-        if(ACTION_START_ON_BOOT.equals(action)){
-            handleActionOn(null);
-        }
         return mBinder;
     }
 

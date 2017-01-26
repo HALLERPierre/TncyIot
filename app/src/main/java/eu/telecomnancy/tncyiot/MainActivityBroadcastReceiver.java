@@ -20,7 +20,7 @@ import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
 public class MainActivityBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("MainActivity",
+        Log.d("MainActivityBroadcastReceiver",
                 "onReceive"
         );
         if (intent.getAction().equals(MainService.PUBLISH_RESULT)){
