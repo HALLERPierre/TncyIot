@@ -48,3 +48,7 @@ captures/
 /build
 /captures
 .externalNativeBuild
+
+
+app/src/main/res/prop.properties
+app/src/main/assets/prop.properties
