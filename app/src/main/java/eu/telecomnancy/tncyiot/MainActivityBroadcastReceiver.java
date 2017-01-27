@@ -6,32 +6,45 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
 import eu.telecomnancy.tncyiot.Entity.LightRecords;
-import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
 
 /**
  * Created by Florian on 25/01/2017.
  */
 
 public class MainActivityBroadcastReceiver extends BroadcastReceiver {
+    private MainActivity activity;
+
+    public MainActivityBroadcastReceiver(MainActivity activity) {
+        this.activity = activity;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("MainActivityBroadcastReceiver",
+        Log.d("MainActivityBroadcastR",
                 "onReceive"
         );
         if (intent.getAction().equals(MainService.PUBLISH_RESULT)){
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
-                //TODO : improve
-                HashMap<String,LightRecords> hashMap = (HashMap<String,LightRecords>)bundle.getSerializable(MainService.OUTPUT_LIGHTS_RECORDS);
-                LightsRecordsData hashMap2 = new LightsRecordsData();
-                hashMap2.putAll(hashMap);
-                Log.d("MainActivity","hashmap on view"+hashMap2.size());
+                //TODO : find why I can't cast directly to my Object
+                ArrayList<Light> listTmp = (ArrayList<Light>)bundle.getSerializable(MainService.OUTPUT_LIGHTS_RECORDS);
+
+                LightRecords listLight = new LightRecords(new LightRecords.ChangeListener() {
+                    @Override
+                    public void onChange(Light light) {
+return;
+                    }
+                });
+                listLight.addAll(listTmp);
+                //refresh activity
+                activity.updateLightListView(listLight);
             }
         }
     }
+
+
 }

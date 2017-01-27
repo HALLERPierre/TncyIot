@@ -16,34 +16,70 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import eu.telecomnancy.tncyiot.Entity.Light;
+import eu.telecomnancy.tncyiot.Entity.LightRecords;
+import eu.telecomnancy.tncyiot.UI.LightAdapter;
 
 
 public class MainActivity extends ActionBarActivity {
-    private BroadcastReceiver receiver = new MainActivityBroadcastReceiver();
-
     //Key of checkBox
-    String startOnBoot = "eu.telecomnancy.tncyiot.app.startOnBoot";
+    private static final String startOnBoot = "eu.telecomnancy.tncyiot.app.startOnBoot";
 
+    /**  Define callback for lights data refresh    */
+    private MainActivityBroadcastReceiver receiver = new MainActivityBroadcastReceiver(this);
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        boolean mBound = false;
+        @Override
+        public void onServiceConnected(ComponentName className,  IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MainService.LocalBinder binder = (MainService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+    //
     private MainService mService;
-    boolean mBound = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         //authorize email sending
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        // add button and controllers
+        buildUI();
 
-        setContentView(R.layout.activity_main);
-        Log.d("MainActivity",
-                "Création de l'activité"
-        );
+        // Create intent & Bind to MainService
+        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
+    }
+
+    /*
+    add controler on buttonOn, buttonOff, checkbox
+     */
+    private void buildUI() {
         //get app prefs
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -76,12 +112,20 @@ public class MainActivity extends ActionBarActivity {
 
         boolean isStartChecked = prefs.getBoolean(startOnBoot, false);
         checkBoxStart.setChecked(isStartChecked);
-
-        // Create intent & Bind to MainService
-        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
-        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
-
     }
+
+    /*
+    update the listview with lights data
+     */
+    public void updateLightListView(ArrayList<Light> lights){
+        Log.d("MainActivity",
+                lights.size()+""
+        );
+        ListView mListView = (ListView) findViewById(R.id.listView);
+        LightAdapter adapter = new LightAdapter(MainActivity.this, lights);
+        mListView.setAdapter(adapter);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,6 +150,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
             return true;
         }
 
@@ -123,21 +168,5 @@ public class MainActivity extends ActionBarActivity {
         unregisterReceiver(receiver);
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MainService.LocalBinder binder = (MainService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 }

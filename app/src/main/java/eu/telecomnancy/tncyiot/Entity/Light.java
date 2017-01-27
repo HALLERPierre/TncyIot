@@ -5,12 +5,11 @@ package eu.telecomnancy.tncyiot.Entity;
  */
 public class Light implements java.io.Serializable {
 
-    public static final int THRESHOLD = 250;
     private long timestamp;
     private String label;
     private double value;
     private String mote;
-
+    private boolean switchOn;
 
     public Light() {
     }
@@ -20,6 +19,10 @@ public class Light implements java.io.Serializable {
         this.label = label;
         this.value = value;
         this.mote = mote;
+    }
+
+    public String getMote() {
+        return mote;
     }
 
     public String getLabel() {
@@ -34,8 +37,12 @@ public class Light implements java.io.Serializable {
         return value;
     }
 
-    public boolean isSwitchOn(){
-        return value>THRESHOLD;
+    public boolean isSwitchOn() {
+        return switchOn;
+    }
+
+    public void setSwitchOn(boolean switchOn) {
+        this.switchOn = switchOn;
     }
 
     @Override

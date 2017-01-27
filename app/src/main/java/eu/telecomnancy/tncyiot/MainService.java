@@ -11,7 +11,7 @@ import android.util.Log;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
+import eu.telecomnancy.tncyiot.Entity.LightRecords;
 
 
 /**
@@ -44,13 +44,18 @@ public class MainService extends IntentService {
         super("MainService");
         timerTask = new LightTimerTask() {
             @Override
-            public void myTimerTaskCallback(LightsRecordsData lightsRecordsDataMap) {
-                publishResults(lightsRecordsDataMap);
+            public void myTimerTaskCallback(LightRecords lightsRecordsList) {
+                publishResults(lightsRecordsList);
             }
 
             @Override
-            public Context myTimerTaskContexte() {
+            public Context myTimerTaskContext() {
                 return getApplicationContext();
+            }
+
+            @Override
+            public String myTimerTaskUrl() {
+                return "http://iotlab.telecomnancy.eu/rest/data/1/light1/last";
             }
         };
 
@@ -86,9 +91,9 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "handleActionOn called"
         );
+        myTimer.scheduleAtFixedRate(timerTask, 0, 10000);
 
-        timerTask.run();
-        myTimer.scheduleAtFixedRate(timerTask, 0, 5000);
+        //timerTask.run();
     }
 
     /**
@@ -139,10 +144,10 @@ public class MainService extends IntentService {
         super.onCreate();
     }
 
-    private void publishResults(LightsRecordsData lightsRecordsDataMap) {
+    private void publishResults(LightRecords lightsRecordsList) {
         Intent intent = new Intent(PUBLISH_RESULT);
         Bundle extras = new Bundle();
-        extras.putSerializable(OUTPUT_LIGHTS_RECORDS, lightsRecordsDataMap);
+        extras.putSerializable(OUTPUT_LIGHTS_RECORDS, lightsRecordsList);
         intent.putExtras(extras);
         sendBroadcast(intent);
 

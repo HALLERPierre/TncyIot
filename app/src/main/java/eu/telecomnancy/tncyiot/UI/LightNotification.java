@@ -1,4 +1,4 @@
-package eu.telecomnancy.tncyiot;
+package eu.telecomnancy.tncyiot.UI;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -12,6 +12,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+
+import eu.telecomnancy.tncyiot.R;
 
 /**
  * Helper class for showing and canceling light

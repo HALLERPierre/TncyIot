@@ -17,7 +17,7 @@ public class RestTask extends AsyncTask<URL, Void, String> {
     private HttpURLConnection urlConnection;
     // This is the reference to the associated listener
     private final TaskListener taskListener;
-    //contexte de l'application
+    //context de l'application
     private Context mContext;
 
     public RestTask(Context appliContext, TaskListener listener) {

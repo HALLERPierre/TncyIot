@@ -1,6 +1,5 @@
 package eu.telecomnancy.tncyiot;
 
-import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
@@ -18,8 +17,8 @@ import java.util.TimerTask;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
 import eu.telecomnancy.tncyiot.Entity.LightRecords;
-import eu.telecomnancy.tncyiot.Entity.LightsRecordsData;
 import eu.telecomnancy.tncyiot.Entity.RestResult;
+import eu.telecomnancy.tncyiot.UI.LightNotification;
 import eu.telecomnancy.tncyiot.Util.MailManager;
 
 /**
@@ -27,21 +26,40 @@ import eu.telecomnancy.tncyiot.Util.MailManager;
  */
 public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
     final Handler handler = new Handler();
-    public LightTimerTask() {
-    }
+
 
     @Override
     public void run() {
         //use a handler to run a toast that shows the current timestamp
         handler.post(new Runnable() {
             public void run() {
-                try {
-                    RestTask task = new RestTask(myTimerTaskContexte(),new RestTask.TaskListener() {
+
+                    RestTask task = new RestTask(myTimerTaskContext(),new RestTask.TaskListener() {
                         @Override
                         public void onFinished(String jsonresult) {
                             // Do Something after the task has finished
                             Log.i("MainService", "RESULT = " + jsonresult);
-                            LightsRecordsData lightsRecordsDataMap = new LightsRecordsData();
+
+                            //list for save lights with the listener in order to detect changes
+                            LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
+                                @Override
+                                public void onChange(Light light) {
+                                    Date date = new Date(light.getTimestamp());
+                                    // S is the millisecond
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
+
+
+                                    Calendar calendar = Calendar.getInstance();
+                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
+                                    if (hourOfDay >= 18 && hourOfDay<= 23)
+                                        LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
+                                    else {
+
+                                        MailManager.sendMailSilent(myTimerTaskContext());
+//
+                                    }
+                                }
+                            });
 
 
                             final Gson gson = new GsonBuilder().create();
@@ -50,36 +68,15 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                             RestResult<Light> restresult = gson.fromJson(jsonresult, castType);
                             //todo:check if data not null
                             for(Light l : restresult.data){
-                                if (! lightsRecordsDataMap.containsKey(l.getLabel())){
-                                    lightsRecordsDataMap.put(l.getLabel(),new LightRecords(new LightRecords.ChangeListener() {
-                                        @Override
-                                        public void onChange(Light light) {
-                                            Date date = new Date(light.getTimestamp());
-                                            // S is the millisecond
-                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
-
-
-                                            Calendar calendar = Calendar.getInstance();
-                                            int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
-                                            if (hourOfDay >= 18 && hourOfDay<= 23)
-                                                LightNotification.notify(myTimerTaskContexte(),light.getLabel(),simpleDateFormat.format(date));
-                                            else {
-
-                                                MailManager.sendMailSilent(myTimerTaskContexte());
-//
-                                            }
-                                        }
-                                    }));
-                                }
-                                lightsRecordsDataMap.get(l.getLabel()).add(l);
-//                                        Log.i("MainService", l.toString());
+                                lightsRecordsList.add(l);
                             }
-                            myTimerTaskCallback(lightsRecordsDataMap);
+                            myTimerTaskCallback(lightsRecordsList);
                             //publishResults(lightsRecordsDataMap);
 
                         }
                     });
-                    task.execute(new URL("http://iotlab.telecomnancy.eu/rest/data/1/light1/last"));
+                try {
+                    task.execute(new URL(myTimerTaskUrl()));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }

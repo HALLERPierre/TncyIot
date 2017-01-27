@@ -18,7 +18,9 @@ public class LightRecords extends ArrayList<Light>  {
     @Override
     public boolean add(Light object) {
         if (calculateAverage()*AVG_THRESHOLD < object.getValue()){
+            object.setSwitchOn(true);
             listener.onChange(object);
+
         }
         return super.add(object);
     }
