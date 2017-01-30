@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
         boolean mBound = false;
+
         @Override
         public void onServiceConnected(ComponentName className,  IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
@@ -72,6 +73,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Create intent & Bind to MainService
         Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
     }
