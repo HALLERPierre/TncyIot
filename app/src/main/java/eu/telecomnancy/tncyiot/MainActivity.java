@@ -1,6 +1,5 @@
 package eu.telecomnancy.tncyiot;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,19 +15,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
-import eu.telecomnancy.tncyiot.Entity.LightRecords;
 import eu.telecomnancy.tncyiot.UI.LightAdapter;
+import eu.telecomnancy.tncyiot.Settings.PrefsActivity;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -152,7 +148,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            startActivity(new Intent(getApplicationContext(), PrefsActivity.class));
             return true;
         }
 

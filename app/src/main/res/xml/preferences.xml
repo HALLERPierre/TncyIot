@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="10px">
+
+    <EditTextPreference
+        android:key="username"
+        android:summary="@string/pref_username"
+        android:title="Your Name"></EditTextPreference>
+    <EditTextPreference
+        android:key="email"
+        android:summary="@string/pref_email"
+        android:title="Your E-Mail"></EditTextPreference>
+</PreferenceScreen>

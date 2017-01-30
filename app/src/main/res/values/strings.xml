@@ -14,4 +14,9 @@
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
 
+    <string name="pref_username">Please provide your username</string>
+    <string name="pref_email">Please provide your username</string>
+
+
+
 </resources>
