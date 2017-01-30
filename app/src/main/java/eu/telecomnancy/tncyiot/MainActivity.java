@@ -1,6 +1,5 @@
 package eu.telecomnancy.tncyiot;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,13 +24,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
-import eu.telecomnancy.tncyiot.Entity.LightRecords;
 import eu.telecomnancy.tncyiot.UI.LightAdapter;
 import eu.telecomnancy.tncyiot.UI.LightViewHolder;
+import eu.telecomnancy.tncyiot.Settings.PrefsActivity;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -43,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
         boolean mBound = false;
+
         @Override
         public void onServiceConnected(ComponentName className,  IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
@@ -75,6 +73,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Create intent & Bind to MainService
         Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
     }
@@ -172,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            startActivity(new Intent(getApplicationContext(), PrefsActivity.class));
             return true;
         }
 

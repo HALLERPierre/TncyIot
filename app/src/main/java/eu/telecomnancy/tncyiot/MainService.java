@@ -34,10 +34,9 @@ public class MainService extends IntentService {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
-
     private static Timer myTimer;
     private static TimerTask timerTask;
-
+    private boolean isThreadRunning = false;
 
 
     public MainService() {
@@ -61,9 +60,6 @@ public class MainService extends IntentService {
 
         myTimer = new Timer();
     }
-
-
-
 
 
     /**
@@ -91,9 +87,10 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "handleActionOn called"
         );
-        myTimer.scheduleAtFixedRate(timerTask, 0, 10000);
-
-        //timerTask.run();
+        if (!isThreadRunning) {
+            myTimer.scheduleAtFixedRate(timerTask, 0, 10000);
+            isThreadRunning = true;
+        }
     }
 
     /**
@@ -105,6 +102,7 @@ public class MainService extends IntentService {
         );
         timerTask.cancel();
         myTimer.purge();
+        isThreadRunning = false;
     }
 
     @Override
@@ -116,7 +114,7 @@ public class MainService extends IntentService {
         super.onStartCommand(intent, startId, startId);
         //Start on boot if checked
         String action = intent.getAction();
-        if(ACTION_START_ON_BOOT.equals(action)){
+        if (ACTION_START_ON_BOOT.equals(action)) {
             handleActionOn(null);
         }
         return START_STICKY;
@@ -132,7 +130,7 @@ public class MainService extends IntentService {
 
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         Log.d("IntentService",
                 "onDestroy called : service detruit"
         );
@@ -140,7 +138,7 @@ public class MainService extends IntentService {
     }
 
     @Override
-    public  void onCreate(){
+    public void onCreate() {
         super.onCreate();
     }
 
