@@ -1,6 +1,7 @@
 package eu.telecomnancy.tncyiot;
 
 import android.app.Application;
+import android.content.Context;
 import android.test.ApplicationTestCase;
 
 import com.github.javafaker.Faker;
@@ -74,6 +75,52 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
 
         assertThat(true, is(true));
+
+    }
+
+
+    @Test
+    public void testRESTLightLast(){
+        LightTimerTask timerTask = new LightTimerTask() {
+            @Override
+            public void myTimerTaskCallback(LightRecords lightsRecordsList) {
+                assertTrue("/{experiment_id}/{labels}/(last|first) contains 3 results",lightsRecordsList.size()==0);
+            }
+
+            @Override
+            public Context myTimerTaskContext() {
+                return getContext();
+            }
+
+            @Override
+            public String myTimerTaskUrl() {
+                return "http://iotlab.telecomnancy.eu/rest/data/1/light1/last";
+            }
+        };
+        timerTask.run();
+
+    }
+
+    @Test
+    public void testRESTLight5results(){
+        LightTimerTask timerTask = new LightTimerTask() {
+            int expected = 5;
+            @Override
+            public void myTimerTaskCallback(LightRecords lightsRecordsList) {
+                assertTrue("/{experiment_id}/{labels}/{nb} contains "+expected+"*3 results",lightsRecordsList.size()==expected*3);
+            }
+
+            @Override
+            public Context myTimerTaskContext() {
+                return getContext();
+            }
+
+            @Override
+            public String myTimerTaskUrl() {
+                return "http://iotlab.telecomnancy.eu/rest/data/1/light1/"+expected;
+            }
+        };
+        timerTask.run();
 
     }
 }

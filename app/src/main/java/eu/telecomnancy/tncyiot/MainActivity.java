@@ -16,11 +16,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.Map;
 import eu.telecomnancy.tncyiot.Entity.Light;
 import eu.telecomnancy.tncyiot.Entity.LightRecords;
 import eu.telecomnancy.tncyiot.UI.LightAdapter;
+import eu.telecomnancy.tncyiot.UI.LightViewHolder;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -117,11 +120,30 @@ public class MainActivity extends ActionBarActivity {
     /*
     update the listview with lights data
      */
-    public void updateLightListView(ArrayList<Light> lights){
-        Log.d("MainActivity",
-                lights.size()+""
-        );
-        ListView mListView = (ListView) findViewById(R.id.listView);
+    public void updateLightListView(final ArrayList<Light> lights){
+
+        if (lights.size() == 0){
+            Toast.makeText(getApplicationContext(), "Service injoignable", Toast.LENGTH_SHORT).show();
+        }
+        final ListView mListView = (ListView) findViewById(R.id.listView);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
+                Light o = (Light)mListView.getItemAtPosition(position);
+                Log.d("MainActivity",
+                        "hit"+o.toString()
+                );
+                Intent sendIntent = new Intent(getApplicationContext(), DetailLightActivity.class);
+                sendIntent.setAction(DetailLightActivity.ACTION_SHOW_DETAIL);
+                sendIntent.putExtra(DetailLightActivity.INPUT_MOTE, o.getMote());
+                sendIntent.putExtra(DetailLightActivity.INPUT_LABEL, o.getLabel());
+                    startActivity(sendIntent);
+
+
+            }
+        });
         LightAdapter adapter = new LightAdapter(MainActivity.this, lights);
         mListView.setAdapter(adapter);
     }
