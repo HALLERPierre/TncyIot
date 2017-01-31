@@ -2,8 +2,10 @@ package eu.telecomnancy.tncyiot.Util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -28,7 +30,7 @@ public class MailManager {
     private static final java.lang.String CONFIG_PROPERTIES = "prop.properties";
     private static Date lastmailsenddate ;
 
-    public static void sendMailSilent(Context contexte){
+    public static void sendMailSilent(Context context){
 
         //init the last mail send date 1 minute ago
         if (lastmailsenddate == null){
@@ -43,9 +45,11 @@ public class MailManager {
         }
 
         //load properties gmail account is not versionned
-        final Properties props = loadProperties(contexte);
+        final Properties props = loadProperties(context);
 
-
+        //Get SP & add listener to it
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String emailDest = prefs.getString("email", "f.kromer54@gmail.com");
 
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
@@ -57,14 +61,14 @@ public class MailManager {
         try {
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("from-email@gmail.com"));
+            message.setFrom(new InternetAddress("TncyIot@gmail.com"));
             message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse("f.kromer54@gmail.com"));
+                    InternetAddress.parse(emailDest));
             message.setSubject("Testing Subject");
             message.setText("Dear Mail Crawler,"
                     + "\n\n No spam to my email, please!");
 
-            Transport.send(message);
+//            Transport.send(message);
             lastmailsenddate = new Date();
 
             Log.d("Mail","sendMailSilent called");
@@ -75,14 +79,14 @@ public class MailManager {
         }
     }
 
-    private static Properties loadProperties(Context contexte) {
+    private static Properties loadProperties(Context context) {
         Properties props = new Properties();
         /**
          * getAssets() Return an AssetManager instance for your
          * application's package. AssetManager Provides access to an
          * application's raw asset files;
          */
-        AssetManager assetManager = contexte.getAssets();
+        AssetManager assetManager = context.getAssets();
         /**
          * Open an asset using ACCESS_STREAMING mode. This
          */
@@ -106,7 +110,12 @@ public class MailManager {
 
     }
 
-    public static  void sendMailIntent(Context contexte) {
+    /**
+     * Open mail app, dont use
+     * @param context
+     */
+    @Deprecated
+    public static  void sendMailIntent(Context context) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setType("message/rfc822");
         intent.putExtra(Intent.EXTRA_EMAIL, "f.kromer54@gmail.com");
@@ -117,7 +126,7 @@ public class MailManager {
         intent.addFlags(Intent.FLAG_FROM_BACKGROUND);
         try {
 
-            contexte.startActivity(intent);
+            context.startActivity(intent);
         } catch (android.content.ActivityNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

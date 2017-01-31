@@ -120,7 +120,9 @@ public class MainActivity extends ActionBarActivity {
     update the listview with lights data
      */
     public void updateLightListView(final ArrayList<Light> lights){
-
+        Log.d("MainActivity",
+                "updateLightListView"
+        );
         if (lights.size() == 0){
             Toast.makeText(getApplicationContext(), "Service injoignable", Toast.LENGTH_SHORT).show();
         }

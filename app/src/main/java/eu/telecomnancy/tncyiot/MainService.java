@@ -41,7 +41,11 @@ public class MainService extends IntentService {
 
     public MainService() {
         super("MainService");
-        timerTask = new LightTimerTask() {
+        timerTask = initTimerTask();
+    }
+
+    public LightTimerTask initTimerTask(){
+        return new LightTimerTask() {
             @Override
             public void myTimerTaskCallback(LightRecords lightsRecordsList) {
                 publishResults(lightsRecordsList);
@@ -57,11 +61,7 @@ public class MainService extends IntentService {
                 return "http://iotlab.telecomnancy.eu/rest/data/1/light1/last";
             }
         };
-
-        myTimer = new Timer();
     }
-
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -88,6 +88,8 @@ public class MainService extends IntentService {
                 "handleActionOn called"
         );
         if (!isThreadRunning) {
+            timerTask = initTimerTask();
+            myTimer = new Timer();
             myTimer.scheduleAtFixedRate(timerTask, 0, 10000);
             isThreadRunning = true;
         }
@@ -100,9 +102,12 @@ public class MainService extends IntentService {
         Log.d("IntentService",
                 "handleActionOff called"
         );
-        timerTask.cancel();
-        myTimer.purge();
-        isThreadRunning = false;
+        if(isThreadRunning) {
+            timerTask.cancel();
+            myTimer.purge();
+            myTimer.cancel();
+            isThreadRunning = false;
+        }
     }
 
     @Override
