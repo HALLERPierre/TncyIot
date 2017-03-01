@@ -1,4 +1,4 @@
-package eu.telecomnancy.tncyiot;
+package eu.telecomnancy.tncyiot.Util;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -11,7 +11,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
+/**
+ * set the httpconnection for for REST call
+ * no business here just technical
+ *
+ */
 public class RestTask extends AsyncTask<URL, Void, String> {
     //client Http
     private HttpURLConnection urlConnection;
@@ -78,7 +82,7 @@ public class RestTask extends AsyncTask<URL, Void, String> {
         super.onPostExecute(result);
 
         if (result.isEmpty()){
-            Toast.makeText(mContext,"Your Message", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext,"No result found", Toast.LENGTH_LONG).show();
         }
         // In onPostExecute we check if the listener is valid
         if(this.taskListener != null) {

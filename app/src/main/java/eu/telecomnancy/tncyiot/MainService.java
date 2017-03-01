@@ -17,9 +17,9 @@ import eu.telecomnancy.tncyiot.Entity.LightRecords;
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
+ *
+ * intentService to manage the rest call
+ * run in separate thread
  */
 public class MainService extends IntentService {
 
@@ -147,6 +147,10 @@ public class MainService extends IntentService {
         super.onCreate();
     }
 
+    /**
+     * send result to the main screen
+     * @param lightsRecordsList
+     */
     private void publishResults(LightRecords lightsRecordsList) {
         Intent intent = new Intent(PUBLISH_RESULT);
         Bundle extras = new Bundle();

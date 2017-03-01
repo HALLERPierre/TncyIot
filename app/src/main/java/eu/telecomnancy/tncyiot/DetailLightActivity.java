@@ -19,6 +19,9 @@ import eu.telecomnancy.tncyiot.Entity.Room;
 
 import static android.R.attr.x;
 
+/**
+ * show more information about a light with a map of the school
+ */
 public class DetailLightActivity extends ActionBarActivity {
     public static final String ACTION_SHOW_DETAIL = "eu.telecomnancy.tncyiot.action.SHOW_DETAIL";
     public static final String INPUT_MOTE = "eu.telecomnancy.tncyiot.extra.MOTE";

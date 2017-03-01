@@ -36,7 +36,8 @@ public class MainActivityBroadcastReceiver extends BroadcastReceiver {
                 LightRecords listLight = new LightRecords(new LightRecords.ChangeListener() {
                     @Override
                     public void onChange(Light light) {
-return;
+                        //TODO:if a light switch is detected what we do ?
+                        return;
                     }
                 });
                 listLight.addAll(listTmp);

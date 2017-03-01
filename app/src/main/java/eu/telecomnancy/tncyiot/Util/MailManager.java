@@ -25,11 +25,16 @@ import javax.mail.internet.MimeMessage;
 
 /**
  * Created by kromer1u on 26/01/17.
+ *
  */
 public class MailManager {
     private static final java.lang.String CONFIG_PROPERTIES = "prop.properties";
     private static Date lastmailsenddate ;
 
+    /**
+     * method called to send email
+     * @param context
+     */
     public static void sendMailSilent(Context context){
 
         //init the last mail send date 1 minute ago

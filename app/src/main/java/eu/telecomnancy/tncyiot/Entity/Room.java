@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * Created by Florian on 30/01/2017.
+ * describe a room in the TNCY building's map
  */
 
 public class Room {

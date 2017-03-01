@@ -34,7 +34,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         Light l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,200,200+50),faker.number().numberBetween(80,200)+"" );
         assertTrue("SwitchOn ok",l.isSwitchOn()==true);
 
-
     }
 
     @Test
@@ -84,7 +83,7 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         LightTimerTask timerTask = new LightTimerTask() {
             @Override
             public void myTimerTaskCallback(LightRecords lightsRecordsList) {
-                assertTrue("/{experiment_id}/{labels}/(last|first) contains 3 results",lightsRecordsList.size()==0);
+                assertTrue("/{experiment_id}/{labels}/(last|first) contains 3 results",lightsRecordsList.size()==3);
             }
 
             @Override

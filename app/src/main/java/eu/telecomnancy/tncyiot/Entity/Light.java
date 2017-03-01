@@ -2,6 +2,7 @@ package eu.telecomnancy.tncyiot.Entity;
 
 /**
  * Created by kromer1u on 24/01/17.
+ * describe a light with properties from api
  */
 public class Light implements java.io.Serializable {
 

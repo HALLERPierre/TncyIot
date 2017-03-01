@@ -20,9 +20,12 @@ import eu.telecomnancy.tncyiot.Entity.LightRecords;
 import eu.telecomnancy.tncyiot.Entity.RestResult;
 import eu.telecomnancy.tncyiot.UI.LightNotification;
 import eu.telecomnancy.tncyiot.Util.MailManager;
+import eu.telecomnancy.tncyiot.Util.RestTask;
 
 /**
  * Created by kromer1u on 26/01/17.
+ * Main task which fetch the api and convert result to a  @class {@link LightRecords}
+ * use a callback to publishresult
  */
 public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
     final Handler handler = new Handler();

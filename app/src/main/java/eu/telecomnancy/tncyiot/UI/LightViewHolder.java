@@ -12,6 +12,7 @@ import eu.telecomnancy.tncyiot.Entity.Light;
 
 /**
  * Created by Florian on 27/01/2017.
+ * describe an item from the @class {@link LightAdapter}
  */
 
 public class LightViewHolder {

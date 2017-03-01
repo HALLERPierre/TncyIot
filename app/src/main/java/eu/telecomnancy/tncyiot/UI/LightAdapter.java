@@ -18,6 +18,7 @@ import eu.telecomnancy.tncyiot.R;
 
 /**
  * Created by Florian on 27/01/2017.
+ * Allow to list the light in the front page by mapping UI and light entity
  */
 
 public class LightAdapter extends ArrayAdapter<Light> {

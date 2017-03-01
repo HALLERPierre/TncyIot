@@ -4,11 +4,18 @@ import java.util.ArrayList;
 
 /**
  * Created by Florian on 25/01/2017.
+ * list of the lights
  */
 
 public class LightRecords extends ArrayList<Light>  {
 
+    /**
+     * threshold in percent
+     */
     public final double AVG_THRESHOLD = 1.30;
+    /**
+     * listerner called when we add a new item
+     */
     private ChangeListener listener;
 
     public LightRecords(ChangeListener listener) {
