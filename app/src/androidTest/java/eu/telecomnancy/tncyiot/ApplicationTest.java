@@ -26,16 +26,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
-
-    @Test
-    public void testDetectSwitchOn(){
-        Faker faker = new Faker();
-        String label = "light1";
-        Light l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,200,200+50),faker.number().numberBetween(80,200)+"" );
-        assertTrue("SwitchOn ok",l.isSwitchOn()==true);
-
-    }
-
     @Test
     public void testDetectPeakInTime() {
         //https://fr.wikipedia.org/wiki/Moyenne_glissante
@@ -45,17 +35,19 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         LightRecords list = new LightRecords(new LightRecords.ChangeListener() {
             @Override
             public void onChange(Light light) {
-
+                System.out.println("OnChange called !");
             }
         });
-        for (int i=0;i< 50;i++){
+        //No light, mote1 with lumen between 10-20
+        Light l = null;
+        for (int i=0;i< 10;i++){
             String label = "light"+faker.number().randomDigit();
-            Light l = new Light(faker.date().between(new Date(2017,1,1), new Date(2017,1,24)).getTime(),label,faker.number().randomDouble(2,2,200),faker.number().numberBetween(80,200)+"" );
+            l = new Light(faker.date().between(new Date(2017,1,1), new Date(2017,1,24)).getTime(),label,faker.number().randomDouble(2,10,20),"mote1");
             list.add(l);
         }
+        //Light is off :
+        assertTrue("SwitchOff",!l.isSwitchOn());
         //sort light data
-
-
         Collections.sort(list, new Comparator<Light>() {
             @Override
             public int compare(Light l1, Light l2)
@@ -63,18 +55,12 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
                 return  l1.getTimestamp() > l2.getTimestamp() ? +1 : l1.getTimestamp() < l2.getTimestamp() ? -1 : 0;
             }
         });
-
-
-        //add light switch on
+        //light switch on, mote1 with lumen between 50-70
         String label = "light1";
-        Light l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,200,200+50),faker.number().numberBetween(80,200)+"" );
+        l = new Light(new Date().getTime(),label,faker.number().randomDouble(2,50,50+20),"mote1" );
         list.add(l);
-
-
-
-
-        assertThat(true, is(true));
-
+        //Light is on :
+        assertTrue("SwitchOn", l.isSwitchOn());
     }
 
 

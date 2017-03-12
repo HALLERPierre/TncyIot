@@ -18,8 +18,18 @@ import eu.telecomnancy.tncyiot.Entity.LightRecords;
 public class MainActivityBroadcastReceiver extends BroadcastReceiver {
     private MainActivity activity;
 
+    private LightRecords listLight;
+
     public MainActivityBroadcastReceiver(MainActivity activity) {
+
         this.activity = activity;
+        listLight = new LightRecords(new LightRecords.ChangeListener() {
+            @Override
+            public void onChange(Light light) {
+                System.out.println(light.getLabel() + " switched on");
+                return;
+            }
+        });
     }
 
     @Override
@@ -33,13 +43,6 @@ public class MainActivityBroadcastReceiver extends BroadcastReceiver {
                 //TODO : find why I can't cast directly to my Object
                 ArrayList<Light> listTmp = (ArrayList<Light>)bundle.getSerializable(MainService.OUTPUT_LIGHTS_RECORDS);
 
-                LightRecords listLight = new LightRecords(new LightRecords.ChangeListener() {
-                    @Override
-                    public void onChange(Light light) {
-                        //TODO:if a light switch is detected what we do ?
-                        return;
-                    }
-                });
                 listLight.addAll(listTmp);
                 //refresh activity
                 activity.updateLightListView(listLight);

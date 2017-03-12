@@ -30,6 +30,25 @@ import eu.telecomnancy.tncyiot.Util.RestTask;
 public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
     final Handler handler = new Handler();
 
+    //list for save lights with the listener in order to detect changes
+    LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
+        @Override
+        public void onChange(Light light) {
+            Date date = new Date(light.getTimestamp());
+            // S is the millisecond
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
+
+
+            Calendar calendar = Calendar.getInstance();
+            int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
+            if (hourOfDay >= 18 && hourOfDay<= 23)
+                LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
+            else {
+                MailManager.sendMailSilent(myTimerTaskContext());
+//
+            }
+        }
+    });
 
     @Override
     public void run() {
@@ -43,26 +62,7 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                             // Do Something after the task has finished
                             Log.i("MainService", "RESULT = " + jsonresult);
 
-                            //list for save lights with the listener in order to detect changes
-                            LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
-                                @Override
-                                public void onChange(Light light) {
-                                    Date date = new Date(light.getTimestamp());
-                                    // S is the millisecond
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
 
-
-                                    Calendar calendar = Calendar.getInstance();
-                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
-                                    if (hourOfDay >= 18 && hourOfDay<= 23)
-                                        LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
-                                    else {
-
-                                        MailManager.sendMailSilent(myTimerTaskContext());
-//
-                                    }
-                                }
-                            });
 
 
                             final Gson gson = new GsonBuilder().create();
