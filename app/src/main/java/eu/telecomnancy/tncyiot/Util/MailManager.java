@@ -46,7 +46,7 @@ public class MailManager {
             lastmailsenddate = cal.getTime();
 
         }
-        if (getDateDiff(lastmailsenddate,new Date(),TimeUnit.SECONDS)<30){
+        if (getDateDiff(lastmailsenddate,new Date(),TimeUnit.SECONDS)<300){
             Log.e("Mail","sendMailSilent called but ignored");
             return;
         }
