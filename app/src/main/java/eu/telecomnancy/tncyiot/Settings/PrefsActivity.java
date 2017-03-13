@@ -52,6 +52,10 @@ public class PrefsActivity extends PreferenceActivity {
         getFragmentManager().executePendingTransactions();
         pf.findPreference("email").setSummary(sp.getString("email", "Please provide email"));
         pf.findPreference("username").setSummary(sp.getString("username", "Please provide username"));
+        pf.findPreference("hourStartNotify").setSummary(sp.getString("hourStartNotify", "Select the start hour to be notify"));
+        pf.findPreference("hourEndNotify").setSummary(sp.getString("hourEndNotify", "Select the end hour to be notify"));
+        pf.findPreference("hourStartMail").setSummary(sp.getString("hourStartMail", "Select the start hour to receive an email"));
+        pf.findPreference("hourEndMail").setSummary(sp.getString("hourStartMail", "Select the end hour to receive an email"));
     }
 
     SharedPreferences.OnSharedPreferenceChangeListener spChanged = new

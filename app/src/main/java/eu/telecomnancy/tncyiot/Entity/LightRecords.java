@@ -20,7 +20,7 @@ public class LightRecords extends ArrayList<Light>  {
     /**
      * THRESHOLD fixed
      */
-    public final double THRESHOLD_FIXED = 200;
+    public final double THRESHOLD_FIXED = 100;
     /**
      * listerner called when we add a new item
      */

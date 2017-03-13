@@ -7,9 +7,26 @@
     <EditTextPreference
         android:key="username"
         android:summary="@string/pref_username"
-        android:title="Your Name"></EditTextPreference>
+        android:title="Your Name"/>
     <EditTextPreference
         android:key="email"
         android:summary="@string/pref_email"
-        android:title="Your E-Mail"></EditTextPreference>
+        android:title="Your E-Mail"/>
+    <eu.telecomnancy.tncyiot.Settings.TimePreference
+        android:key="hourStartNotify"
+        android:summary="Select the start hour to be notify"
+        android:title="Start notify hour"/>
+    <eu.telecomnancy.tncyiot.Settings.TimePreference
+        android:key="hourEndNotify"
+        android:summary="Select the end hour to be notify"
+        android:title="End notify hour"/>
+    <eu.telecomnancy.tncyiot.Settings.TimePreference
+        android:key="hourStartMail"
+        android:summary="Select the start hour to receive an email"
+        android:title="Start notify email"/>
+    <eu.telecomnancy.tncyiot.Settings.TimePreference
+        android:key="hourEndMail"
+        android:summary="Select the end hour to receive an email"
+        android:title="End mail hour"/>
 </PreferenceScreen>
+

@@ -1,6 +1,8 @@
 package eu.telecomnancy.tncyiot;
 
+import android.content.SharedPreferences;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -30,8 +32,8 @@ import eu.telecomnancy.tncyiot.Util.RestTask;
  * use a callback to publishresult
  */
 public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
-    final Handler handler = new Handler();
-    final HashMap<String, MovingAverage> objAvg = new HashMap<>();
+    final private Handler handler = new Handler();
+    final private HashMap<String, MovingAverage> objAvg = new HashMap<>();
     @Override
     public void run() {
         //use a handler to run a toast that shows the current timestamp
@@ -44,7 +46,21 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                             // Do Something after the task has finished
                             Log.i("MainService", "RESULT = " + jsonresult);
 
-
+                            //Get SP & add listener to it
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(myTimerTaskContext());
+                            String hourStartNotify = prefs.getString("hourStartNotify", "19:00");
+                            String hourEndNotify = prefs.getString("hourEndNotify", "23:00");
+                            String hourStartMail = prefs.getString("hourStartMail", "23:00");
+                            String hourEndMail = prefs.getString("hourEndMail", "06:00");
+                            //Easier to compare
+                            final int intStartNotify = Integer.parseInt(hourStartNotify.split(":")[0]) * 100
+                                    + Integer.parseInt(hourStartNotify.split(":")[1]);
+                            final int intEndNotify = Integer.parseInt(hourEndNotify.split(":")[0]) * 100
+                                    + Integer.parseInt(hourEndNotify.split(":")[1]);
+                            final int intStartMail = Integer.parseInt(hourStartMail.split(":")[0]) * 100
+                                    + Integer.parseInt(hourStartMail.split(":")[1]);
+                            final int intEndMail = Integer.parseInt(hourEndMail.split(":")[0]) * 100
+                                    + Integer.parseInt(hourEndMail.split(":")[1]);
                             //list for save lights with the listener in order to detect changes
                             LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
                                 @Override
@@ -56,11 +72,17 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                                     Calendar calendar = Calendar.getInstance();
                                     boolean isWeekEnd = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
                                             calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY;
-                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
-                                    if (hourOfDay >= 19 && hourOfDay<= 23 && !isWeekEnd)
+                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY)*100
+                                            + calendar.get(Calendar.MINUTE);
+                                    //If 23 > 6 && (hourOfDay < 6 OR hourofday > 23) or regular
+                                    if ((intStartNotify > intEndNotify &&
+                                            (hourOfDay < intEndNotify || hourOfDay > intStartNotify))
+                                            || (hourOfDay > intStartNotify && hourOfDay < intEndNotify)){
                                         LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
-                                    else if ((isWeekEnd && (hourOfDay >= 19 && hourOfDay<= 23)) ||
-                                                (!isWeekEnd && (hourOfDay <= 6 || hourOfDay>= 23))){
+                                    }
+                                    if ((intStartMail > intEndMail &&
+                                            (hourOfDay < intEndMail || hourOfDay > intStartMail))
+                                            || (hourOfDay > intStartMail && hourOfDay < intEndMail)){
                                         MailManager.sendMailSilent(myTimerTaskContext(), light);
                                     }
                                 }
