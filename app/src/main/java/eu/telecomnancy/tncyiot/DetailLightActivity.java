@@ -26,7 +26,7 @@ public class DetailLightActivity extends ActionBarActivity {
     public static final String ACTION_SHOW_DETAIL = "eu.telecomnancy.tncyiot.action.SHOW_DETAIL";
     public static final String INPUT_MOTE = "eu.telecomnancy.tncyiot.extra.MOTE";
     public static final String INPUT_LABEL = "eu.telecomnancy.tncyiot.extra.LABEL";
-
+    public static final String INPUT_SWITCH = "eu.telecomnancy.tncyiot.extra.SWITCH";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,35 +36,21 @@ public class DetailLightActivity extends ActionBarActivity {
         // On récupère l'intent qui a lancé cette activité
         Intent i = getIntent();
 
-        final String mote = i.getStringExtra(INPUT_MOTE);
-        final String label = i.getStringExtra(INPUT_LABEL);
+        Bundle bundle = i.getBundleExtra("bundle");
+        Light l = null;
+        if (bundle != null) {
+            l = (Light)bundle.getSerializable("light");
+        }
 
-        LightTimerTask timerTask = new LightTimerTask() {
-            @Override
-            public void myTimerTaskCallback(LightRecords lightsRecordsList) {
-                updateView(lightsRecordsList);
-            }
-
-            @Override
-            public Context myTimerTaskContext() {
-                return getApplicationContext();
-            }
-
-            @Override
-            public String myTimerTaskUrl() {
-                return "http://iotlab.telecomnancy.eu/rest/data/1/"+label+"/5/"+mote;
-            }
-        };
-        timerTask.run();
+        updateView(l);
 
     }
 
-    private void updateView(LightRecords lightsRecordsList) {
+    private void updateView(Light lr) {
         Map<String,Room> map =  Room.loadMoteInRooms();
 
 
         final RelativeLayout rr = (RelativeLayout) findViewById(R.id.activity_detail_light);
-        Light lr = lightsRecordsList.get(0);
             if (map.containsKey(lr.getMote())){
                 Room r = map.get(lr.getMote());
                 ImageView iv = new ImageView(getApplicationContext());
@@ -79,7 +65,6 @@ public class DetailLightActivity extends ActionBarActivity {
             }
 
 
-        Log.d("Detail",lightsRecordsList.size()+"");
     }
 
 }

@@ -18,6 +18,10 @@ public class LightRecords extends ArrayList<Light>  {
      */
     public final double AVG_THRESHOLD = 1.50;
     /**
+     * THRESHOLD fixed
+     */
+    public final double THRESHOLD_FIXED = 200;
+    /**
      * listerner called when we add a new item
      */
     private ChangeListener listener;
@@ -26,10 +30,10 @@ public class LightRecords extends ArrayList<Light>  {
      */
     private HashMap<String,MovingAverage> objectAverage;
 
-    public LightRecords(ChangeListener listener) {
+    public LightRecords(ChangeListener listener, HashMap<String,MovingAverage> oAvg) {
 
         this.listener = listener;
-        this.objectAverage = new HashMap<String,MovingAverage>();
+        this.objectAverage = oAvg;
     }
 
     @Override
@@ -47,10 +51,16 @@ public class LightRecords extends ArrayList<Light>  {
         mvgAvg.newNum(object.getValue());
         double newAvg = mvgAvg.getAvg();
         System.out.println("old avg : " + oldAvg + " || new avg : " + newAvg);
+        boolean isNull = (oldAvg == 0 || newAvg == 0);
         //if 50% diff in new & old avg, switch on
-        if (oldAvg*AVG_THRESHOLD < newAvg && (oldAvg > 0 && newAvg > 0)){
+        if (oldAvg*AVG_THRESHOLD < newAvg && !isNull){
             object.setSwitchOn(true);
             listener.onChange(object);
+        } else if (newAvg*AVG_THRESHOLD < oldAvg && !isNull){
+            object.setSwitchOn(false);
+        } else if (object.getValue() > THRESHOLD_FIXED){
+            listener.onChange(object);
+            object.setSwitchOn(true);
         }
         return super.add(object);
     }

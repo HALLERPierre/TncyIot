@@ -23,9 +23,6 @@ import eu.telecomnancy.tncyiot.Entity.LightRecords;
  */
 public class MainService extends IntentService {
 
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    public static final String ACTION_START_ON_BOOT = "eu.telecomnancy.tncyiot.action.STARTONBOOT";
-
     public static final String PUBLISH_RESULT = "eu.telecomnancy.tncyiot.service.receiver";
     // TODO: get url from activy
     public static final String INPUT_REST_URL = "eu.telecomnancy.tncyiot.extra.PARAM1";
@@ -119,7 +116,10 @@ public class MainService extends IntentService {
         super.onStartCommand(intent, startId, startId);
         //Start on boot if checked
         String action = intent.getAction();
-        if (ACTION_START_ON_BOOT.equals(action)) {
+        if (MyBootBroadcastReceiver.ACTION_START_ON_BOOT.equals(action)) {
+            Log.d("IntentService",
+                    "Start on boot called : service créé"
+            );
             handleActionOn(null);
         }
         return START_STICKY;

@@ -27,6 +27,9 @@ public class Room {
         map.put("153.111",new Room("2-06",491,90));
         map.put("81.77",new Room("2-07",587,90));
         map.put("9.138",new Room("2-07",600,90));
+        map.put("53.105",new Room("2-06",491,90));
+        map.put("77.106",new Room("2-05",410,90));
+
         return map;
 
     }

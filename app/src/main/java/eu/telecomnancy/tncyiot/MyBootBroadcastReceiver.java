@@ -26,7 +26,7 @@ public class MyBootBroadcastReceiver extends BroadcastReceiver {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean isStartChecked = prefs.getBoolean(startOnBoot, false);
         Intent intentStart = new Intent(context, MainService.class);
-        intentStart.setAction(MainService.ACTION_START_ON_BOOT);
+        intentStart.setAction(ACTION_START_ON_BOOT);
         // Start on boot
         if(isStartChecked && intent.getAction().equals(ACTION_START_ON_BOOT)){
             context.startService(intentStart);

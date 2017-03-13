@@ -23,6 +23,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import eu.telecomnancy.tncyiot.Entity.Light;
+
 /**
  * Created by kromer1u on 26/01/17.
  *
@@ -35,7 +37,7 @@ public class MailManager {
      * method called to send email
      * @param context
      */
-    public static void sendMailSilent(Context context){
+    public static void sendMailSilent(Context context, Light light){
 
         //init the last mail send date 1 minute ago
         if (lastmailsenddate == null){
@@ -55,6 +57,7 @@ public class MailManager {
         //Get SP & add listener to it
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String emailDest = prefs.getString("email", "f.kromer54@gmail.com");
+        String username = prefs.getString("username", "noname");
 
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
@@ -69,11 +72,11 @@ public class MailManager {
             message.setFrom(new InternetAddress("TncyIot@gmail.com"));
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(emailDest));
-            message.setSubject("Testing Subject");
-            message.setText("Dear Mail Crawler,"
-                    + "\n\n No spam to my email, please!");
+            message.setSubject("Tncy IOT light detected");
+            message.setText("Dear " + username +" , "
+                    + "Light : " + light.getMote() + " switched on.");
 
-//            Transport.send(message);
+            Transport.send(message);
             lastmailsenddate = new Date();
 
             Log.d("Mail","sendMailSilent called");

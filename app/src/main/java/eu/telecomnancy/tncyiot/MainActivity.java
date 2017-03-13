@@ -138,9 +138,11 @@ public class MainActivity extends ActionBarActivity {
                 );
                 Intent sendIntent = new Intent(getApplicationContext(), DetailLightActivity.class);
                 sendIntent.setAction(DetailLightActivity.ACTION_SHOW_DETAIL);
-                sendIntent.putExtra(DetailLightActivity.INPUT_MOTE, o.getMote());
-                sendIntent.putExtra(DetailLightActivity.INPUT_LABEL, o.getLabel());
-                    startActivity(sendIntent);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("light", o);
+                sendIntent.putExtra("bundle", bundle);
+
+                startActivity(sendIntent);
 
 
             }

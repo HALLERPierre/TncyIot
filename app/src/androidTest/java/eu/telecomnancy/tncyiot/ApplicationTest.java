@@ -11,9 +11,11 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
 import eu.telecomnancy.tncyiot.Entity.LightRecords;
+import eu.telecomnancy.tncyiot.Util.MovingAverage;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -32,12 +34,13 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
         //generates dummy data
         Faker faker = new Faker();
+        HashMap<String, MovingAverage> objAvg = new HashMap<>();
         LightRecords list = new LightRecords(new LightRecords.ChangeListener() {
             @Override
             public void onChange(Light light) {
                 System.out.println("OnChange called !");
             }
-        });
+        }, objAvg);
         //No light, mote1 with lumen between 10-20
         Light l = null;
         for (int i=0;i< 10;i++){

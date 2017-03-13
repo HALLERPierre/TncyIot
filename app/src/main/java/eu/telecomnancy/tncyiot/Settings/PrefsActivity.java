@@ -39,7 +39,7 @@ public class PrefsActivity extends PreferenceActivity {
     @Override
     public void onBuildHeaders(List<Header> target)
     {
-        loadHeadersFromResource(R.xml.headers_preference, target);
+        //loadHeadersFromResource(R.xml.headers_preference, target);
     }
 
     @Override

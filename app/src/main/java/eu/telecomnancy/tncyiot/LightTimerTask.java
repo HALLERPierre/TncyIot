@@ -13,6 +13,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimerTask;
 
 import eu.telecomnancy.tncyiot.Entity.Light;
@@ -20,6 +21,7 @@ import eu.telecomnancy.tncyiot.Entity.LightRecords;
 import eu.telecomnancy.tncyiot.Entity.RestResult;
 import eu.telecomnancy.tncyiot.UI.LightNotification;
 import eu.telecomnancy.tncyiot.Util.MailManager;
+import eu.telecomnancy.tncyiot.Util.MovingAverage;
 import eu.telecomnancy.tncyiot.Util.RestTask;
 
 /**
@@ -29,27 +31,7 @@ import eu.telecomnancy.tncyiot.Util.RestTask;
  */
 public abstract class LightTimerTask extends TimerTask  implements ILightTimerTask {
     final Handler handler = new Handler();
-
-    //list for save lights with the listener in order to detect changes
-    LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
-        @Override
-        public void onChange(Light light) {
-            Date date = new Date(light.getTimestamp());
-            // S is the millisecond
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
-
-
-            Calendar calendar = Calendar.getInstance();
-            int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
-            if (hourOfDay >= 18 && hourOfDay<= 23)
-                LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
-            else {
-                MailManager.sendMailSilent(myTimerTaskContext());
-//
-            }
-        }
-    });
-
+    final HashMap<String, MovingAverage> objAvg = new HashMap<>();
     @Override
     public void run() {
         //use a handler to run a toast that shows the current timestamp
@@ -63,7 +45,26 @@ public abstract class LightTimerTask extends TimerTask  implements ILightTimerTa
                             Log.i("MainService", "RESULT = " + jsonresult);
 
 
+                            //list for save lights with the listener in order to detect changes
+                            LightRecords lightsRecordsList = new LightRecords(new LightRecords.ChangeListener() {
+                                @Override
+                                public void onChange(Light light) {
+                                    Date date = new Date(light.getTimestamp());
+                                    // S is the millisecond
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
 
+                                    Calendar calendar = Calendar.getInstance();
+                                    boolean isWeekEnd = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY ||
+                                            calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY;
+                                    int hourOfDay  = calendar.get(Calendar.HOUR_OF_DAY);
+                                    if (hourOfDay >= 19 && hourOfDay<= 23 && !isWeekEnd)
+                                        LightNotification.notify(myTimerTaskContext(),light.getMote(),simpleDateFormat.format(date));
+                                    else if ((isWeekEnd && (hourOfDay >= 19 && hourOfDay<= 23)) ||
+                                                (!isWeekEnd && (hourOfDay <= 6 || hourOfDay>= 23))){
+                                        MailManager.sendMailSilent(myTimerTaskContext(), light);
+                                    }
+                                }
+                            }, objAvg);
 
                             final Gson gson = new GsonBuilder().create();
                             Type castType = new TypeToken<RestResult<Light>>(){}.getType();
